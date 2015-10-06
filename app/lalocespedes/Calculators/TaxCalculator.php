@@ -2,8 +2,6 @@
 
 namespace lalocespedes\Calculators;
 
-use lalocespedes\Models\Taxes\Taxes;
-
 /**
 * 
 */
@@ -16,19 +14,18 @@ class TaxCalculator
 	protected $id;
 
 	/**
+	* The subtotal of the item
+	* @var int
+	*/
+	protected $subtotal;
+
+	/**
 	 * An array to store taxes
 	 * var array
 	 */
 	protected $taxes = [];
 
-	protected $calculatedAmount = [];
-
-	public function __construct()
-	{
-		$this->calculatedTaxes = [
-			'tax_amount'	=> 0
-		];
-	}
+	protected $calculatedTaxes = [];
 
 	/**
 	 * Sets the id
@@ -40,17 +37,26 @@ class TaxCalculator
 	}
 
 	/**
-	 * Adds a tax for calculation
-	 * @param int $itemId
-	 * @param float $quantity
-	 * @param float $price
+	 * Sets the subtotal
+	 * @param float $subtotal
 	 */
-	public function addItem($itemId, $quantity, $price)
+	public function setSubtotal($subtotal)
+	{
+		$this->subtotal = $subtotal;
+	}
+
+	/**
+	* Adds a taxes for calculation
+	* @param int $id
+	* @param float $tax_rate
+	* @param boolean $incluido
+	*/
+	public function addTax($id, $tax_rate, $incluido)
 	{
 		$this->taxes[] = [
-			'itemId'	=> $itemId,
-			'quantity'	=> $quantity,
-			'price'		=> $price
+			'id'		=> $id,
+			'tax_rate'	=> $tax_rate,
+			'incluido'	=> $incluido
 		];
 	}
 
@@ -59,38 +65,49 @@ class TaxCalculator
 	 */
 	public function calculate()
 	{
-		$this->calculateTaxes;
+		$this->calculateTaxes();
 	}
 
-	public function calculateTaxes($subtotal, $taxes)
-	{	
-		foreach ($taxes as $key => $value) {
+	/**
+	* Returns calculated item amounts
+	* @return array
+	*/
+	public function getCalculatedTaxes()
+	{
+		return $this->calculatedTaxes;
+	}
 
-			$rate = Taxes::where('id', $value->tax_rate_id)->first()->tax_rate_percent;
+	/**
+	 * Calculates the taxes
+	 */
+	protected function calculateTaxes()
+	{
+		foreach ($this->taxes as $key => $value) {
 
-			if (!$value->tax_rate_option) {
-				
-				$tax =  $subtotal * ($rate / 100);
+			if (!$value['incluido']) {
 
-				$array[] = [
-					'id'			=> $value->id,
-					'tax_amount' 	=> $tax
-				];
+				$tax = round($this->subtotal * ($value['tax_rate'] / 100), 2);
+
+				$this->calculatedTaxes[] = [
+                	'id'   			=> $value['id'],
+                	'tax_amount'	=> $tax
+                ];
 
 			} else {
 
-				$tax = ($subtotal / (($rate/100) + 1));
+				$subtotal = ($this->subtotal / (($value['tax_rate']/100) + 1));
 
-				$array[] = [
-					'id'			=> $value->id,
-					'tax_amount' 	=> $tax
+				$tax = round($subtotal * ($value['tax_rate'] / 100), 2);
+
+				$this->calculatedTaxes[] = [
+                	'id'   			=> $value['id'],
+                	'tax_amount'	=> $tax
 				];
 
 			}
 
 		}
 
-		return $array;
 	}
 
 }
