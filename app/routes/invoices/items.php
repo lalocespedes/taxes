@@ -1,15 +1,49 @@
 <?php
 
 use lalocespedes\Calculators\TaxCalculator;
+use lalocespedes\Models\Invoices\InvoiceItem;
 use lalocespedes\Models\Invoices\InvoiceItemTax;
 
 $app->get('/invoices/item', function() use($app) {
 
-	$ItemSubtotal = 1000;
+	$ItemPost = [
 
-	$invoiceItemId = 1;
+		'invoice_id'		=> 1,
+		'item_name'			=> 'B0001',
+		'item_description'	=> 'Bdescription',
+		'item_qty'			=> 1,
+		'item_price'		=> 2000,
+		'item_unidad'		=> 'NA'
 
-	$taxes = InvoiceItemTax::where('invoice_item_id', $invoiceItemId)->with('tax_rates')->get();
+	];
+
+	$TaxesPost = [1,4];
+
+	$incluido = 0;
+
+
+	//item store
+	$item = InvoiceItem::create($ItemPost);
+
+	$ItemSubtotal = $item->item_qty * $item->item_price;
+
+	//taxes store
+	foreach ($TaxesPost as $key => $value) {
+
+		InvoiceItemTax::create([
+							
+			'invoice_item_id'	=> $item->id,
+			'tax_rate_id'		=> $value,
+			'tax_rate_option'	=> $incluido
+
+		]);
+	}
+
+
+	//calucate taxes
+
+	//get taxes
+	$taxes = InvoiceItemTax::where('invoice_item_id', $item->id)->with('tax_rates')->get();
 
 	$calculatorTax = new TaxCalculator;
 	$calculatorTax->setSubtotal($ItemSubtotal);
@@ -24,10 +58,13 @@ $app->get('/invoices/item', function() use($app) {
 
 	}
 
+	
 	$calculatorTax->calculate();
 
+	//get taxes calculated
     $calculatedTaxes = $calculatorTax->getCalculatedTaxes();
 
+    //update item tax amount
 	foreach ($calculatedTaxes as $key => $value) {
 		
 		InvoiceItemTax::where('id', $value['id'])
@@ -35,6 +72,11 @@ $app->get('/invoices/item', function() use($app) {
 							'tax_amount'	=> $value['tax_amount']
 						]);
 	}
+
+	//update item amounts
+
+	//get taxes calculated
+    $calculatedAmounts = $calculatorTax->getCalculatedAmounts();
 
 	echo "<br> finished";
 

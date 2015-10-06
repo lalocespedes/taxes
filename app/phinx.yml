@@ -16,7 +16,7 @@ environments:
     development:
         adapter: mysql
         host: localhost
-        name: dev
+        name: taxes
         user: root
         pass: 'root'
         port: 3306

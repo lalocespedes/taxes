@@ -12,7 +12,7 @@ return [
 	'db' 	=> [
 		'driver' 	=> 'mysql',
 		'host'		=> 'localhost',
-		'name'		=> 'dev',
+		'name'		=> 'taxes',
 		'username'	=> 'root',
 		'password'	=> 'root',
 		'charset'	=> 'utf8',
