@@ -31,4 +31,5 @@ class InvoiceItemTax extends Eloquent
     {
     	return $this->belongsTo('lalocespedes\Models\Taxes\Taxes', 'tax_rate_id');
     }
+
 }

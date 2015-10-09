@@ -28,6 +28,12 @@ class TaxCalculator
 	protected $calculatedTaxes = [];
 
 	/**
+	* An array to store overall calculated amounts
+	* @var array
+	*/
+	protected $calculatedAmount = [];
+
+	/**
 	 * Sets the id
 	 * @param int $id
 	 */
@@ -51,12 +57,11 @@ class TaxCalculator
 	* @param float $tax_rate
 	* @param boolean $incluido
 	*/
-	public function addTax($id, $tax_rate, $incluido)
-	{
+	public function addTax($id, $tax_rate)
+	{	
 		$this->taxes[] = [
 			'id'		=> $id,
-			'tax_rate'	=> $tax_rate,
-			'incluido'	=> $incluido
+			'tax_rate'	=> $tax_rate / 100,
 		];
 	}
 
@@ -69,7 +74,7 @@ class TaxCalculator
 	}
 
 	/**
-	* Returns calculated item amounts
+	* Returns calculated item taxes
 	* @return array
 	*/
 	public function getCalculatedTaxes()
@@ -78,35 +83,34 @@ class TaxCalculator
 	}
 
 	/**
-	 * Calculates the taxes
-	 */
+	* Returns calculated item amounts
+	* @return array
+	*/
+	public function getCalculatedAmount()
+	{
+		return $this->calculatedAmount;
+	}
+
+	/**
+	* Calculates the taxes
+	*/
 	protected function calculateTaxes()
 	{
 		foreach ($this->taxes as $key => $value) {
 
-			if (!$value['incluido']) {
+			$tax = round($this->subtotal * ($value['tax_rate']), 2);
 
-				$tax = round($this->subtotal * ($value['tax_rate'] / 100), 2);
+			$this->calculatedTaxes[] = [
+				'id'			=> $value['id'],
+				'tax_amount'	=> $tax
+			];
 
-				$this->calculatedTaxes[] = [
-                	'id'   			=> $value['id'],
-                	'tax_amount'	=> $tax
-                ];
-
-			} else {
-
-				$subtotal = ($this->subtotal / (($value['tax_rate']/100) + 1));
-
-				$tax = round($subtotal * ($value['tax_rate'] / 100), 2);
-
-				$this->calculatedTaxes[] = [
-                	'id'   			=> $value['id'],
-                	'tax_amount'	=> $tax
-				];
-
-			}
+			$this->calculatedAmount['subtotal'] = $this->subtotal;
+			$this->calculatedAmount['item_tax_total'] += $tax;
 
 		}
+
+		$this->calculatedAmount['item_total'] = $this->calculatedAmount['subtotal'] + $this->calculatedAmount['item_tax_total'];
 
 	}
 

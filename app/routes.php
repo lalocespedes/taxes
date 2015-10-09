@@ -11,4 +11,5 @@ require  './app/routes/migrate.php';
 require './app/routes/user/all.php';
 
 //invoices
+require './app/routes/invoices/invoice.php';
 require './app/routes/invoices/items.php';

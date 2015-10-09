@@ -20,4 +20,19 @@ class InvoiceItem extends Eloquent
 		'item_unidad'
 	];
 
+	//relations
+	public function ItemAmount()
+    {
+    	return $this->hasOne('lalocespedes\Models\Invoices\InvoiceItemAmount', 'invoice_item_id');
+    }
+
+    public function invoice()
+    {
+        return $this->belongsTo('lalocespedes\Models\Invoices\Invoice');
+    }
+
+    public function ItemTax()
+    {
+    	return $this->hasMany('lalocespedes\Models\Invoices\InvoiceItemTax', 'invoice_item_id');
+    }
 }

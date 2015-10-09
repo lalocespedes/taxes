@@ -7,6 +7,7 @@ use Slim\Views\TwigExtension;
 use Noodlehaus\Config;
 
 //models
+use Illuminate\Database\Capsule\Manager as Capsule;
 use lalocespedes\Models\User\User;
 
 // set timezone for timestamps etc
